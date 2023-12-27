@@ -466,3 +466,4 @@ test.tar
 train.tar
 val.tar
 EuroSAT_RGB.zip
+hymenoptera_data.zip
