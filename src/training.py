@@ -177,7 +177,7 @@ def train_me(net, train_loader, valid_loader, learning_rate=0.01, momentum=0.9, 
 
 
 # references: https://pytorch.org/tutorials/beginner/transfer_learning_tutorial.html
-def train_model(model, dataloaders, criterion, optimizer, scheduler, num_epochs=25):
+def train_model(model, dataloaders, criterion, optimizer, scheduler, num_epochs, dataset_sizes):
     since = time.time()
 
     # Create a temporary directory to save training checkpoints
