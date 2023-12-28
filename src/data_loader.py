@@ -16,6 +16,7 @@ import time
 import os
 from PIL import Image
 from tempfile import TemporaryDirectory
+import random
 
 cudnn.benchmark = True
 plt.ion()   # interactive mode
@@ -44,44 +45,36 @@ data_transforms = {
 }
 
 
-def GetDataLoadersLimited(data_dir, batch_size=4, shuffle=True, num_workers=4, limit=600):
-    image_datasets = {x: datasets.ImageFolder(os.path.join(data_dir, x),
-                                          data_transforms[x]) for x in ['train', 'val', 'test']}
-    
-    # Limit train set to 100 images per category
-    train_dataset = image_datasets['train']
-    train_dataset.samples = [
-        (path, target) for path, target in train_dataset.samples if target < limit
-    ]
-    train_dataset.targets = [target for target in train_dataset.targets if target < limit]
-    
-    # Limit validation set to 100 images per category
-    val_dataset = image_datasets['val']
-    val_dataset.samples = [
-        (path, target) for path, target in val_dataset.samples if target < limit
-    ]
-    val_dataset.targets = [target for target in val_dataset.targets if target < limit]
-    
-    # Limit test set to 100 images per category
-    test_dataset = image_datasets['test']
-    test_dataset.samples = [
-        (path, target) for path, target in test_dataset.samples if target < limit
-    ]
-    test_dataset.targets = [target for target in test_dataset.targets if target < limit]
-    
-    dataloaders = {x: torch.utils.data.DataLoader(image_datasets[x], batch_size=batch_size, shuffle=shuffle, num_workers=num_workers)
-                for x in ['train', 'val', 'test']}
-    dataset_sizes = {x: len(image_datasets[x]) for x in ['train', 'val', 'test']}
-    class_names = image_datasets['train'].classes
-    return dataloaders, class_names, dataset_sizes
+def GetDataLoaders(data_dir, batch_size=4, shuffle=True, num_workers=4, validation_split=0.2, test_split=0.1):
+    train_dir = os.path.join(data_dir, 'train')
+    train_dataset = datasets.ImageFolder(train_dir, data_transforms['train'])
 
-def GetDataLoaders(data_dir, batch_size=4, shuffle=True, num_workers=4):
-    image_datasets = {x: datasets.ImageFolder(os.path.join(data_dir, x),
-                                          data_transforms[x]) for x in ['train', 'val', 'test']}
-    dataloaders = {x: torch.utils.data.DataLoader(image_datasets[x], batch_size=batch_size, shuffle=shuffle, num_workers=num_workers)
-                for x in ['train', 'val', 'test']}
-    dataset_sizes = {x: len(image_datasets[x]) for x in ['train', 'val', 'test']}
-    class_names = image_datasets['train'].classes
+    # Calculate the number of samples for each split
+    num_samples = len(train_dataset)
+    num_val = int(validation_split * num_samples)
+    num_test = int(test_split * num_samples)
+    num_train = num_samples - num_val - num_test
+
+    # Split the dataset into train, validation, and test sets
+    train_dataset, val_dataset, test_dataset = torch.utils.data.random_split(train_dataset, [num_train, num_val, num_test])
+
+    # Create data loaders for each set
+    train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, shuffle=shuffle, num_workers=num_workers)
+    val_loader = torch.utils.data.DataLoader(val_dataset, batch_size=batch_size, shuffle=shuffle, num_workers=num_workers)
+    test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=batch_size, shuffle=shuffle, num_workers=num_workers)
+
+    dataloaders = {
+        'train': train_loader,
+        'val': val_loader,
+        'test': test_loader
+    }
+    dataset_sizes = {
+        'train': num_train,
+        'val': num_val,
+        'test': num_test
+    }
+    class_names = train_dataset.classes
+
     return dataloaders, class_names, dataset_sizes
 
 def imshow(inp, title=None):
