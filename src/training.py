@@ -186,7 +186,7 @@ def train_model(model, dataloaders, criterion, optimizer, scheduler, num_epochs,
 
         torch.save(model.state_dict(), best_model_params_path)
         best_acc = 0.0
-
+        loss_log = [] # Log the training loss
         for epoch in range(num_epochs):
             print(f'Epoch {epoch}/{num_epochs - 1}')
             print('-' * 10)
@@ -214,7 +214,7 @@ def train_model(model, dataloaders, criterion, optimizer, scheduler, num_epochs,
                         outputs = model(inputs)
                         _, preds = torch.max(outputs, 1)
                         loss = criterion(outputs, labels)
-
+                        loss_log.append(loss.item())
                         # backward + optimize only if in training phase
                         if phase == 'train':
                             loss.backward()

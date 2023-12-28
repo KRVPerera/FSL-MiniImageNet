@@ -46,10 +46,8 @@ class Shufflenet_v2_x0_5(nn.Module):
     def __init__(self, num_classes):
         super().__init__()
         weights = ShuffleNet_V2_X0_5_Weights.DEFAULT
-        self.model = shufflenet_v2_x0_5(weights=weights, progress=False)
-        self.transforms = weights.transforms(antialias=True)
+        self.model = shufflenet_v2_x0_5(weights=ShuffleNet_V2_X0_5_Weights.DEFAULT, progress=False)
         self.model.fc = nn.Linear(self.model.fc.in_features, num_classes)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        x = self.transforms(x)
         return self.model(x)
