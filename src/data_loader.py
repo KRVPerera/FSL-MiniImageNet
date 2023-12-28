@@ -16,6 +16,7 @@ import time
 import os
 from PIL import Image
 from tempfile import TemporaryDirectory
+import random
 
 cudnn.benchmark = True
 plt.ion()   # interactive mode
