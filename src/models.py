@@ -1,16 +1,13 @@
-from torchvision.models import resnet18
-from torchvision.models import vgg11_bn
-from torchvision.models import googlenet
-import torchvision
+from torchvision.models import resnet18, ResNet18_Weights
+from torchvision.models import vgg11_bn, VGG11_BN_Weights
+from torchvision.models import googlenet, GoogLeNet_Weights
 import torch
 import torch.nn as nn
-from timm import create_model
 
 class VGG11_BN_FC_Changed(nn.Module):
     def __init__(self, num_classes):
         super().__init__()
         weights = VGG11_BN_Weights.DEFAULT
-        self.model = vgg11_bn(weights=weights, progress=False)
         self.model = vgg11_bn(weights=weights, progress=False)
         self.model.classifier = nn.Sequential(
             nn.Linear(512 * 7 * 7, 4096),
@@ -31,7 +28,7 @@ class Resnet18_FC_Changed(nn.Module):
     def __init__(self, num_classes):
         super().__init__()
         weights=ResNet18_Weights.DEFAULT
-        self.model = torch.hub.load('pytorch/vision:v0.10.0', 'resnet18', pretrained=True)
+        self.model = resnet18(weights=weights, pretrained=True)
         self.transform = weights.transforms(antialias=True)
         self.model.fc = nn.Linear(self.model.fc.in_features, num_classes)
 
