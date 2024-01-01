@@ -49,9 +49,12 @@ data_transforms = {
     ]),
 }
 
+def SmallGetDataLoaders(data_dir, batch_size=4, shuffle=True, num_workers=4, validation_split=0.2, test_split=0.1):
+    original_train_dataset = datasets.ImageFolder(data_dir, data_transforms['train'])
+    return original_train_dataset
+
 def GetDataLoaders(data_dir, batch_size=4, shuffle=True, num_workers=4, validation_split=0.2, test_split=0.1):
-    train_dir = os.path.join(data_dir, 'train')
-    original_train_dataset = datasets.ImageFolder(train_dir, data_transforms['train'])
+    original_train_dataset = datasets.ImageFolder(data_dir, data_transforms['train'])
     # print(dir(original_train_dataset))
 
     # Calculate the number of samples for each split
@@ -116,17 +119,26 @@ def GetDataLoadersEuroSat(data_dir, batch_size=4, shuffle=True, num_workers=4, v
 
     return dataloaders, class_names, dataset_sizes
 
+
 def imshow(inp, title=None):
     """Display image for Tensor."""
     inp = inp.numpy().transpose((1, 2, 0))
-    mean = np.array([0.485, 0.456, 0.406])
-    std = np.array([0.229, 0.224, 0.225])
-    inp = std * inp + mean
-    inp = np.clip(inp, 0, 1)
     plt.imshow(inp)
     if title is not None:
         plt.title(title)
     plt.pause(0.001)  # pause a bit so that plots are updated
+
+# def imshow(inp, title=None):
+#     """Display image for Tensor."""
+#     inp = inp.numpy().transpose((1, 2, 0))
+#     mean = np.array([0.485, 0.456, 0.406])
+#     std = np.array([0.229, 0.224, 0.225])
+#     inp = std * inp + mean
+#     inp = np.clip(inp, 0, 1)
+#     plt.imshow(inp)
+#     if title is not None:
+#         plt.title(title)
+#     plt.pause(0.001)  # pause a bit so that plots are updated
 
 
 def visualize_models(model, dataloaders, num_images, class_names):

@@ -28,7 +28,7 @@ class Resnet18_FC_Changed(nn.Module):
     def __init__(self, num_classes):
         super().__init__()
         weights=ResNet18_Weights.DEFAULT
-        self.model = resnet18(weights=weights, pretrained=True)
+        self.model = resnet18(weights=weights, progress=False)
         self.transform = weights.transforms(antialias=True)
         self.model.fc = nn.Linear(self.model.fc.in_features, num_classes)
 
