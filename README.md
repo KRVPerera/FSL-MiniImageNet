@@ -1,4 +1,4 @@
-# few-shot-MiniImageNet-EuroSAT
+# CDFSL MiniImageNet to EuroSAT and CUB
 
 ## Accuracy of models
 
