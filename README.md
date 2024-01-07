@@ -1,5 +1,11 @@
 # CDFSL MiniImageNet to EuroSAT and CUB
 
+## Pretraining notebooks
+
+- [VGG](notebooks/model_pre_training_vgg.ipynb)
+- [ViT](notebooks/model_pre_training_Vit.ipynb)
+
+
 ## Accuracy of models
 
 ### Pre-train on `miniImageNet` dataset
