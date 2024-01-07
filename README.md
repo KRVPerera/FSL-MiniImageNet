@@ -5,6 +5,18 @@
 - [VGG](notebooks/model_pre_training_vgg.ipynb)
 - [ViT](notebooks/model_pre_training_Vit.ipynb)
 
+## Finetuning notebooks
+
+### EuroSAT_RGB
+
+- [ViT](notebooks/model_fine_tuning_Vit.ipynb)
+- [VGG](notebooks/model_fine_tuning_VGG.ipynb)
+
+### CUB
+
+- [ViT](notebooks/model_fine_tuning_Vit_CUB_50.ipynb)
+- [VGG](notebooks/model_fine_tuning_VGG_CUB_50.ipynb)
+
 
 ## Accuracy of models
 
