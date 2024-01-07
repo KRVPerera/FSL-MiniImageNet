@@ -6,15 +6,31 @@ import os
 import time
 import matplotlib.pyplot as plt
 
-device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
-print('Device:', device)
+def eval_method(net, data_loader, criterion=nn.CrossEntropyLoss()):
+    use_cuda = torch.cuda.is_available()
+    if use_cuda:
+        net = net.cuda()
+    net.eval()
+    correct = 0.0
+    num_images = 0.0
+    loss = 0.0
+    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+    for i_batch, (images, labels) in enumerate(data_loader):
+        images, labels = images.to(device), labels.to(device)
+        outs = net(images)
+        loss += criterion(outs, labels).item()
+        _, predicted = torch.max(outs.data, 1)
+        correct += (predicted == labels).sum().item()
+        num_images += len(labels)
+        print('testing -> batch: %d correct: %d num of images: %d' % (i_batch, correct, num_images) + '\r', end='')
+    acc = correct / num_images
+    loss /= len(data_loader)
+    return acc, loss
 
 def eval_func(net, data_loader):
     use_cuda = torch.cuda.is_available()
     if use_cuda:
         net = net.cuda()
-    else:
-        print("No Cude")
     net.eval()
     correct = 0.0
     num_images = 0.0
@@ -23,13 +39,55 @@ def eval_func(net, data_loader):
             images = images.cuda()
             labels = labels.cuda()
         outs = net(images) 
-#         _, preds = outs.max(1)
         preds = outs.argmax(dim=1)
         correct += preds.eq(labels).sum()
         num_images += len(labels)
 
     acc = correct / num_images
     return acc
+
+
+def train_fine_tuning(net, dataloaders, criterion, optimizer, scheduler, num_epochs, learning_rate):
+    train_loader = dataloaders['train']
+    test_loader = dataloaders['test']
+    
+    use_cuda = torch.cuda.is_available()
+    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+    if use_cuda:
+        net = net.cuda()
+
+    training_losses = []
+    val_losses = []
+    for epoch in range(num_epochs):
+        net.train()
+        correct = 0.0
+        num_images = 0.0
+        total_loss = 0.0
+
+        for i_batch, (images, labels) in enumerate(train_loader):
+            images, labels = images.to(device), labels.to(device)
+            output_train = net(images)
+            loss = criterion(output_train, labels)
+
+            optimizer.zero_grad()
+            loss.backward()
+            optimizer.step()
+
+            predicts = output_train.argmax(dim=1)
+            correct += predicts.eq(labels).sum().item()
+            num_images += len(labels)
+            total_loss += loss.item()
+
+        acc = correct / num_images
+        acc_test, test_loss = eval_method(net, test_loader, criterion)
+        average_loss = total_loss / len(train_loader)
+        training_losses.append(average_loss)
+        val_losses.append(test_loss)
+        print('epoch: %d, accuracy: %f, avg. loss: %f, test accuracy: %f' % (epoch, acc, average_loss, acc_test))
+
+        scheduler.step()
+
+    return net, training_losses, val_losses
 
 # references: https://pytorch.org/tutorials/beginner/transfer_learning_tutorial.html
 def train_model(model, dataloaders, criterion, optimizer, scheduler, num_epochs, dataset_sizes):

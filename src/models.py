@@ -1,49 +1,40 @@
-from torchvision.models import resnet18, ResNet18_Weights
-from torchvision.models import vgg11_bn, VGG11_BN_Weights
-from torchvision.models import googlenet, GoogLeNet_Weights
+from timm import create_model
+
 import torch
 import torch.nn as nn
 
-class VGG11_BN_FC_Changed(nn.Module):
-    def __init__(self, num_classes):
-        super().__init__()
-        weights = VGG11_BN_Weights.DEFAULT
-        self.model = vgg11_bn(weights=weights, progress=False)
-        self.model.classifier = nn.Sequential(
-            nn.Linear(512 * 7 * 7, 4096),
-            nn.ReLU(True),
-            nn.Dropout(p=0.5),
-            nn.Linear(4096, 4096),
-            nn.ReLU(True),
-            nn.Dropout(p=0.5),
-            nn.Linear(4096, num_classes),
-        )
-        self.transform = weights.transforms(antialias=True)
+class ModelResnet152dTimm(nn.Module):
+    def __init__(self, output_count):
+        super(ModelResnet152dTimm, self).__init__()
+        self.model = create_model('resnet152d', pretrained=True)
+        self.model.fc = nn.Linear(self.model.fc.in_features, output_count)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        x = self.transform(x)
-        return self.model(x)
-
-class Resnet18_FC_Changed(nn.Module):
-    def __init__(self, num_classes):
-        super().__init__()
-        weights=ResNet18_Weights.DEFAULT
-        self.model = resnet18(weights=weights, progress=False)
-        self.transform = weights.transforms(antialias=True)
-        self.model.fc = nn.Linear(self.model.fc.in_features, num_classes)
-
-    def forward(self, x: torch.Tensor) -> torch.Tensor:
-        x = self.transform(x)
         return self.model(x)
     
-class GoogleNet(nn.Module):
-    def __init__(self, num_classes):
-        super().__init__()
-        weights=GoogLeNet_Weights.DEFAULT
-        self.model = googlenet(weights=weights, progress=False)
-        self.transform = weights.transforms(antialias=True)
-        self.model.fc = nn.Linear(self.model.fc.in_features, num_classes)
+class ModelResnet50Timm(nn.Module):
+    def __init__(self, output_count):
+        super(ModelResnet50Timm, self).__init__()
+        self.model = create_model('resnet152d', pretrained=True)
+        self.model.fc = nn.Linear(self.model.fc.in_features, output_count)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        x = self.transform(x)
+        return self.model(x)
+    
+class VisionTransformerTimm(nn.Module):
+    def __init__(self, num_classes):
+        super(VisionTransformerTimm, self).__init__()
+        self.model = create_model('vit_base_patch32_224', pretrained=True)
+        self.model.head = nn.Linear(self.model.head.in_features, num_classes)
+
+    def forward(self, x):
+        return self.model(x)
+
+class VGG19(nn.Module):
+    def __init__(self, num_classes):
+        super(VGG19, self).__init__()
+        self.model = create_model('vgg19', pretrained=True)
+        self.model.head.fc = nn.Linear(self.model.head.fc.in_features, num_classes)
+
+    def forward(self, x):
         return self.model(x)
